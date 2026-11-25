@@ -1,0 +1,459 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>English Fun - Pronunciation</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #FFF6E8;
+    color: #333;
+    text-align: center;
+}
+
+header {
+    background: #6C63FF;
+    color: white;
+    padding: 20px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    padding: 25px 20px;
+}
+
+.progress {
+    font-size: 18px;
+    color: #777;
+    margin: 15px;
+}
+
+.card {
+    background: white;
+    border-radius: 25px;
+    padding: 25px;
+    box-shadow: 0 4px 10px #ddd;
+}
+
+.letter {
+    font-size: 85px;
+    font-weight: bold;
+    color: #6C63FF;
+}
+
+.picture {
+    font-size: 100px;
+    margin: 15px;
+}
+
+.word {
+    font-size: 35px;
+    font-weight: bold;
+    color: #FF8C42;
+}
+
+.instruction {
+    font-size: 18px;
+    margin: 20px;
+}
+
+button {
+    border: none;
+    border-radius: 15px;
+    padding: 15px 22px;
+    font-size: 18px;
+    cursor: pointer;
+    margin: 7px;
+}
+
+.listen-btn {
+    background: #6C63FF;
+    color: white;
+}
+
+.speak-btn {
+    background: #FF8C42;
+    color: white;
+}
+
+.next-btn {
+    background: #4CAF50;
+    color: white;
+}
+
+.home-btn {
+    background: #FFD166;
+    color: #333;
+}
+
+.feedback {
+    min-height: 45px;
+    font-size: 19px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.alphabet-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 7px;
+    margin-top: 25px;
+}
+
+.alphabet-grid button {
+    background: white;
+    border: 2px solid #6C63FF;
+    color: #6C63FF;
+    padding: 10px 0;
+    margin: 0;
+}
+
+.alphabet-grid button.active {
+    background: #6C63FF;
+    color: white;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌈 English Fun</h1>
+    <p>Pronunciation Activity</p>
+</header>
+
+<div class="container">
+
+    <div class="progress" id="progress">
+        Letter 1 of 26
+    </div>
+
+    <div class="card">
+
+        <h2>Let's Pronounce!</h2>
+
+        <div class="letter" id="letter">A a</div>
+
+        <div class="picture" id="picture">🍎</div>
+
+        <div class="word" id="word">Apple</div>
+
+        <p class="instruction">
+            Listen to the word and try saying it!
+        </p>
+
+    </div>
+
+    <button class="listen-btn" onclick="listen()">
+        🔊 Listen
+    </button>
+
+    <button class="speak-btn" onclick="speak()">
+        🎤 Speak
+    </button>
+
+    <div class="feedback" id="feedback"></div>
+
+    <button class="next-btn" onclick="nextLetter()">
+        Next Letter ➜
+    </button>
+
+    <br>
+
+    <button class="home-btn" onclick="goHome()">
+        🏠 Home
+    </button>
+
+    <h3>Choose Your Letter</h3>
+
+    <div class="alphabet-grid" id="alphabetGrid"></div>
+
+</div>
+
+<script>
+
+// Alphabet pronunciation data
+const alphabet = [
+    ["A","Apple","🍎"],
+    ["B","Ball","⚽"],
+    ["C","Cat","🐱"],
+    ["D","Dog","🐶"],
+    ["E","Elephant","🐘"],
+    ["F","Fish","🐟"],
+    ["G","Goat","🐐"],
+    ["H","House","🏠"],
+    ["I","Ice","🧊"],
+    ["J","Juice","🧃"],
+    ["K","Kite","🪁"],
+    ["L","Lion","🦁"],
+    ["M","Monkey","🐵"],
+    ["N","Nest","🪺"],
+    ["O","Orange","🍊"],
+    ["P","Pen","🖊️"],
+    ["Q","Queen","👑"],
+    ["R","Rabbit","🐰"],
+    ["S","Sun","☀️"],
+    ["T","Tiger","🐯"],
+    ["U","Umbrella","☂️"],
+    ["V","Van","🚐"],
+    ["W","Watermelon","🍉"],
+    ["X","Xylophone","🎵"],
+    ["Y","Yo-yo","🪀"],
+    ["Z","Zebra","🦓"]
+];
+
+let currentIndex = 0;
+let recognition = null;
+
+// Load selected letter
+function loadLetter() {
+
+    const item = alphabet[currentIndex];
+
+    document.getElementById("letter").textContent =
+        item[0] + " " + item[0].toLowerCase();
+
+    document.getElementById("picture").textContent =
+        item[2];
+
+    document.getElementById("word").textContent =
+        item[1];
+
+    document.getElementById("progress").textContent =
+        "Letter " + (currentIndex + 1) + " of 26";
+
+    document.getElementById("feedback").textContent = "";
+
+    updateAlphabet();
+}
+
+// Listen to pronunciation
+function listen() {
+
+    const item = alphabet[currentIndex];
+
+    if (!("speechSynthesis" in window)) {
+        alert("Speech is not supported by this browser.");
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const speech = new SpeechSynthesisUtterance(
+        item[0] + ". " + item[1]
+    );
+
+    speech.lang = "en-US";
+    speech.rate = 0.75;
+    speech.pitch = 1.1;
+
+    window.speechSynthesis.speak(speech);
+}
+
+// Microphone speech recognition
+function speak() {
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+    const feedback = document.getElementById("feedback");
+
+    if (!SpeechRecognition) {
+
+        feedback.textContent =
+            "Sorry! Your browser does not support speech recognition.";
+
+        feedback.style.color = "red";
+
+        return;
+    }
+
+    recognition = new SpeechRecognition();
+
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    feedback.textContent = "🎤 Listening...";
+
+    recognition.onresult = function(event) {
+
+        const spokenWord =
+            event.results[0][0].transcript
+            .toLowerCase().trim();
+
+        const correctWord =
+            alphabet[currentIndex][1].toLowerCase();
+
+        if (spokenWord === correctWord) {
+
+            feedback.textContent =
+                "🎉 Excellent! Correct pronunciation!";
+
+            feedback.style.color = "green";
+
+        } else {
+
+            feedback.textContent =
+                "😊 You said: " + spokenWord +
+                ". Try again!";
+
+            feedback.style.color = "red";
+        }
+    };
+
+    recognition.onerror = function() {
+
+        feedback.textContent =
+            "Microphone error. Please try again.";
+
+        feedback.style.color = "red";
+    };
+
+    recognition.start();
+}
+
+// Next letter
+function nextLetter() {
+
+    if (recognition) {
+        recognition.abort();
+        recognition = null;
+    }
+
+    if (currentIndex < alphabet.length - 1) {
+
+        currentIndex++;
+
+        loadLetter();
+
+    } else {
+
+        showCompletion();
+    }
+}
+
+// Create alphabet navigation
+function createAlphabet() {
+
+    const grid = document.getElementById("alphabetGrid");
+
+    alphabet.forEach(function(item, index) {
+
+        const button = document.createElement("button");
+
+        button.textContent = item[0];
+
+        button.onclick = function() {
+
+            if (recognition) {
+                recognition.abort();
+                recognition = null;
+            }
+
+            currentIndex = index;
+
+            loadLetter();
+        };
+
+        grid.appendChild(button);
+    });
+}
+
+// Highlight selected alphabet
+function updateAlphabet() {
+
+    const buttons =
+        document.getElementById("alphabetGrid").children;
+
+    for (let i = 0; i < buttons.length; i++) {
+
+        buttons[i].classList.remove("active");
+    }
+
+    buttons[currentIndex].classList.add("active");
+}
+
+// Completion screen
+function showCompletion() {
+
+    document.querySelector(".container").innerHTML = `
+        <div class="card">
+            <div class="picture">🏆</div>
+            <h2>Congratulations!</h2>
+            <p>You have completed all 26 letters!</p>
+            <p style="font-size:22px">
+                Keep practising your English!
+            </p>
+            <button class="next-btn"
+                onclick="restartActivity()">
+                Practise Again 🔄
+            </button>
+            <br>
+            <button class="home-btn" onclick="goHome()">
+                Home
+            </button>
+        </div>
+    `;
+}
+
+// Restart activity
+function restartActivity() {
+
+    currentIndex = 0;
+
+    document.querySelector(".container").innerHTML = `
+        <div class="progress" id="progress"></div>
+        <div class="card">
+            <h2>Let's Pronounce!</h2>
+            <div class="letter" id="letter"></div>
+            <div class="picture" id="picture"></div>
+            <div class="word" id="word"></div>
+            <p class="instruction">
+                Listen to the word and try saying it!
+            </p>
+        </div>
+        <button class="listen-btn" onclick="listen()">🔊 Listen</button>
+        <button class="speak-btn" onclick="speak()">🎤 Speak</button>
+        <div class="feedback" id="feedback"></div>
+        <button class="next-btn" onclick="nextLetter()">Next Letter ➜</button>
+        <br>
+        <button class="home-btn" onclick="goHome()">🏠 Home</button>
+        <h3>Choose Your Letter</h3>
+        <div class="alphabet-grid" id="alphabetGrid"></div>
+    `;
+
+    createAlphabet();
+    loadLetter();
+}
+
+// Home navigation
+function goHome() {
+
+    window.location.href = "index.html";
+}
+
+// Start activity
+createAlphabet();
+loadLetter();
+
+</script>
+
+</body>
+</html>

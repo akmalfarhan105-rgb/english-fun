@@ -1,0 +1,495 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>English Fun - Spelling Game</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #FFF6E8;
+    color: #333;
+    text-align: center;
+}
+
+header {
+    background: #6C63FF;
+    color: white;
+    padding: 20px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    padding: 25px 20px;
+}
+
+.progress {
+    color: #777;
+    font-size: 18px;
+    margin: 15px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 25px;
+    box-shadow: 0 4px 10px #ddd;
+}
+
+.picture {
+    font-size: 100px;
+    margin: 15px;
+}
+
+.instruction {
+    font-size: 20px;
+}
+
+.answer-area {
+    min-height: 65px;
+    background: white;
+    border: 3px dashed #FFD166;
+    border-radius: 15px;
+    padding: 12px;
+    margin: 25px 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.answer-letter {
+    background: #6C63FF;
+    color: white;
+    padding: 12px 17px;
+    border-radius: 10px;
+    font-size: 25px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.tiles {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tile {
+    background: #FFD166;
+    color: #333;
+    border: none;
+    border-radius: 12px;
+    padding: 15px 18px;
+    font-size: 25px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.tile:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+button {
+    border: none;
+    border-radius: 15px;
+    padding: 14px 22px;
+    font-size: 17px;
+    cursor: pointer;
+    margin: 7px;
+}
+
+.check-btn {
+    background: #FF8C42;
+    color: white;
+}
+
+.clear-btn {
+    background: #6C63FF;
+    color: white;
+}
+
+.next-btn {
+    background: #4CAF50;
+    color: white;
+    display: none;
+}
+
+.home-btn {
+    background: #FFD166;
+    color: #333;
+}
+
+.feedback {
+    min-height: 35px;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌈 English Fun</h1>
+    <p>Spelling Game</p>
+</header>
+
+<div class="container">
+
+    <div class="progress" id="progress">
+        Question 1 of 26
+    </div>
+
+    <div class="card">
+
+        <h2>Spell the Word!</h2>
+
+        <p class="instruction">
+            Look at the picture and arrange the letters.
+        </p>
+
+        <div class="picture" id="picture">🍎</div>
+
+    </div>
+
+    <h3>Your Answer</h3>
+
+    <div class="answer-area" id="answerArea"></div>
+
+    <h3>Choose the Letters</h3>
+
+    <div class="tiles" id="tiles"></div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <button class="check-btn" id="checkBtn"
+        onclick="checkAnswer()">
+        Check Answer ✓
+    </button>
+
+    <button class="clear-btn"
+        onclick="clearAnswer()">
+        Clear ↻
+    </button>
+
+    <br>
+
+    <button class="next-btn" id="nextBtn"
+        onclick="nextQuestion()">
+        Next ➜
+    </button>
+
+    <br>
+
+    <button class="home-btn" onclick="goHome()">
+        🏠 Home
+    </button>
+
+</div>
+
+<script>
+
+// All 26 alphabet spelling questions
+const questions = [
+    ["Apple", "🍎"],
+    ["Ball", "⚽"],
+    ["Cat", "🐱"],
+    ["Dog", "🐶"],
+    ["Elephant", "🐘"],
+    ["Fish", "🐟"],
+    ["Goat", "🐐"],
+    ["House", "🏠"],
+    ["Ice", "🧊"],
+    ["Juice", "🧃"],
+    ["Kite", "🪁"],
+    ["Lion", "🦁"],
+    ["Monkey", "🐵"],
+    ["Nest", "🪺"],
+    ["Orange", "🍊"],
+    ["Pen", "🖊️"],
+    ["Queen", "👑"],
+    ["Rabbit", "🐰"],
+    ["Sun", "☀️"],
+    ["Tiger", "🐯"],
+    ["Umbrella", "☂️"],
+    ["Van", "🚐"],
+    ["Watermelon", "🍉"],
+    ["Xylophone", "🎵"],
+    ["Yo-yo", "🪀"],
+    ["Zebra", "🦓"]
+];
+
+let currentQuestion = 0;
+let score = 0;
+let selectedLetters = [];
+let letterTiles = [];
+let answered = false;
+
+// Load question
+function loadQuestion() {
+
+    const question = questions[currentQuestion];
+
+    selectedLetters = [];
+    answered = false;
+
+    document.getElementById("progress").textContent =
+        "Question " + (currentQuestion + 1) +
+        " of " + questions.length;
+
+    document.getElementById("picture").textContent =
+        question[1];
+
+    document.getElementById("answerArea").innerHTML = "";
+
+    document.getElementById("feedback").textContent = "";
+
+    document.getElementById("nextBtn").style.display =
+        "none";
+
+    document.getElementById("checkBtn").style.display =
+        "inline-block";
+
+    createTiles(question[0]);
+}
+
+// Create shuffled letters
+function createTiles(word) {
+
+    const letters = word.toUpperCase().split("");
+
+    const extraLetters = ["A", "B", "E"];
+
+    let shuffled = [...letters];
+
+    // Add extra letters not already included
+    const extras = extraLetters.filter(
+        letter => !letters.includes(letter)
+    );
+
+    shuffled.push(...extras.slice(0, 2));
+
+    shuffled.sort(() => Math.random() - 0.5);
+
+    letterTiles = shuffled.map((letter, index) => ({
+        letter: letter,
+        used: false,
+        index: index
+    }));
+
+    displayTiles();
+}
+
+// Display letter buttons
+function displayTiles() {
+
+    const tiles = document.getElementById("tiles");
+
+    tiles.innerHTML = "";
+
+    letterTiles.forEach(function(item) {
+
+        const button = document.createElement("button");
+
+        button.textContent = item.letter;
+        button.className = "tile";
+        button.disabled = item.used;
+
+        button.onclick = function() {
+            selectLetter(item.index);
+        };
+
+        tiles.appendChild(button);
+    });
+}
+
+// Select letter
+function selectLetter(index) {
+
+    if (answered || letterTiles[index].used) return;
+
+    letterTiles[index].used = true;
+
+    selectedLetters.push(index);
+
+    displayTiles();
+    displayAnswer();
+}
+
+// Display selected letters
+function displayAnswer() {
+
+    const area = document.getElementById("answerArea");
+
+    area.innerHTML = "";
+
+    selectedLetters.forEach(function(index, position) {
+
+        const button = document.createElement("button");
+
+        button.textContent = letterTiles[index].letter;
+
+        button.className = "answer-letter";
+
+        button.onclick = function() {
+            removeLetter(position);
+        };
+
+        area.appendChild(button);
+    });
+}
+
+// Remove selected letter
+function removeLetter(position) {
+
+    if (answered) return;
+
+    const index = selectedLetters[position];
+
+    letterTiles[index].used = false;
+
+    selectedLetters.splice(position, 1);
+
+    displayTiles();
+    displayAnswer();
+}
+
+// Clear answer
+function clearAnswer() {
+
+    if (answered) return;
+
+    selectedLetters.forEach(function(index) {
+        letterTiles[index].used = false;
+    });
+
+    selectedLetters = [];
+
+    displayTiles();
+    displayAnswer();
+
+    document.getElementById("feedback").textContent = "";
+}
+
+// Check answer
+function checkAnswer() {
+
+    if (answered) return;
+
+    const answer = selectedLetters
+        .map(index => letterTiles[index].letter)
+        .join("");
+
+    const correctWord =
+        questions[currentQuestion][0].toUpperCase();
+
+    const feedback = document.getElementById("feedback");
+
+    if (answer === correctWord) {
+
+        feedback.textContent = "🎉 Excellent! Correct!";
+
+        feedback.style.color = "green";
+
+        score++;
+
+        answered = true;
+
+        document.getElementById("checkBtn").style.display =
+            "none";
+
+        document.getElementById("nextBtn").style.display =
+            "inline-block";
+
+    } else {
+
+        feedback.textContent = "😊 Not quite! Try again!";
+
+        feedback.style.color = "red";
+    }
+}
+
+// Next question
+function nextQuestion() {
+
+    currentQuestion++;
+
+    if (currentQuestion < questions.length) {
+
+        loadQuestion();
+
+    } else {
+
+        showResult();
+    }
+}
+
+// Final result
+function showResult() {
+
+    document.querySelector(".container").innerHTML = `
+        <div class="card">
+            <div class="picture">🏆</div>
+            <h2>Congratulations!</h2>
+            <h3>You completed all 26 words!</h3>
+            <p style="font-size:28px;color:#FF8C42">
+                Score: ${score} / ${questions.length}
+            </p>
+            <button class="check-btn"
+                onclick="restartGame()">
+                Play Again 🔄
+            </button>
+            <br>
+            <button class="home-btn" onclick="goHome()">
+                Home
+            </button>
+            <br>
+            <button class="clear-btn" onclick="goPronunciation()">
+                Pronunciation ➜
+            </button>
+        </div>
+    `;
+}
+
+// Restart game
+function restartGame() {
+
+    currentQuestion = 0;
+    score = 0;
+
+    loadQuestion();
+}
+
+// Navigation
+function goHome() {
+    window.location.href = "index.html";
+}
+
+function goPronunciation() {
+    window.location.href = "pronunciation.html";
+}
+
+// Start game
+loadQuestion();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>English Fun - Alphabet Practice</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #FFF6E8;
+    color: #333;
+    text-align: center;
+}
+
+header {
+    background: #6C63FF;
+    color: white;
+    padding: 20px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    padding: 25px 20px;
+}
+
+.progress {
+    color: #777;
+    margin: 15px;
+    font-size: 18px;
+}
+
+.card {
+    background: white;
+    border-radius: 25px;
+    padding: 25px 15px;
+    box-shadow: 0 4px 10px #ddd;
+}
+
+.question {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.picture {
+    font-size: 100px;
+    margin: 20px;
+}
+
+.word {
+    font-size: 35px;
+    color: #FF8C42;
+    font-weight: bold;
+}
+
+.answers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.answer-btn {
+    background: white;
+    border: 3px solid #FFD166;
+    border-radius: 18px;
+    padding: 20px;
+    font-size: 35px;
+    font-weight: bold;
+    color: #6C63FF;
+    cursor: pointer;
+}
+
+.answer-btn:hover {
+    background: #FFD166;
+}
+
+.answer-btn:disabled {
+    cursor: default;
+    opacity: 0.7;
+}
+
+.feedback {
+    min-height: 40px;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 25px 0;
+}
+
+button {
+    border: none;
+    border-radius: 15px;
+    padding: 15px 25px;
+    font-size: 18px;
+    cursor: pointer;
+    margin: 8px;
+}
+
+.next-btn {
+    background: #FF8C42;
+    color: white;
+    display: none;
+}
+
+.home-btn {
+    background: #FFD166;
+    color: #333;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌈 English Fun</h1>
+    <p>Alphabet Practice</p>
+</header>
+
+<div class="container">
+
+    <div class="progress" id="progress">
+        Question 1 of 26
+    </div>
+
+    <div class="card">
+
+        <p class="question">
+            Which letter does this word start with?
+        </p>
+
+        <div class="picture" id="picture">🍎</div>
+
+        <div class="word" id="word">Apple</div>
+
+    </div>
+
+    <div class="answers" id="answers"></div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <button class="next-btn" id="nextBtn"
+        onclick="nextQuestion()">
+        Next ➜
+    </button>
+
+    <br>
+
+    <button class="home-btn" onclick="goHome()">
+        🏠 Learn Alphabet
+    </button>
+
+</div>
+
+<script>
+
+const questions = [
+    ["A", "Apple", "🍎"],
+    ["B", "Ball", "⚽"],
+    ["C", "Cat", "🐱"],
+    ["D", "Dog", "🐶"],
+    ["E", "Elephant", "🐘"],
+    ["F", "Fish", "🐟"],
+    ["G", "Goat", "🐐"],
+    ["H", "House", "🏠"],
+    ["I", "Ice cream", "🍦"],
+    ["J", "Juice", "🧃"],
+    ["K", "Kite", "🪁"],
+    ["L", "Lion", "🦁"],
+    ["M", "Monkey", "🐵"],
+    ["N", "Nest", "🪺"],
+    ["O", "Orange", "🍊"],
+    ["P", "Penguin", "🐧"],
+    ["Q", "Queen", "👑"],
+    ["R", "Rabbit", "🐰"],
+    ["S", "Sun", "☀️"],
+    ["T", "Tiger", "🐯"],
+    ["U", "Umbrella", "☂️"],
+    ["V", "Van", "🚐"],
+    ["W", "Watermelon", "🍉"],
+    ["X", "Xylophone", "🎵"],
+    ["Y", "Yo-yo", "🪀"],
+    ["Z", "Zebra", "🦓"]
+];
+
+let currentQuestion = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+
+    answered = false;
+
+    const item = questions[currentQuestion];
+
+    document.getElementById("progress").textContent =
+        "Question " + (currentQuestion + 1) +
+        " of " + questions.length;
+
+    document.getElementById("picture").textContent =
+        item[2];
+
+    document.getElementById("word").textContent =
+        item[1];
+
+    document.getElementById("feedback").textContent = "";
+
+    document.getElementById("nextBtn").style.display =
+        "none";
+
+    createAnswers(item[0]);
+}
+
+function createAnswers(correctLetter) {
+
+    const answers = document.getElementById("answers");
+
+    answers.innerHTML = "";
+
+    let options = [correctLetter];
+
+    while (options.length < 3) {
+
+        let randomLetter = String.fromCharCode(
+            65 + Math.floor(Math.random() * 26)
+        );
+
+        if (!options.includes(randomLetter)) {
+            options.push(randomLetter);
+        }
+    }
+
+    options.sort(() => Math.random() - 0.5);
+
+    options.forEach(function(letter) {
+
+        const button = document.createElement("button");
+
+        button.textContent = letter;
+        button.className = "answer-btn";
+
+        button.onclick = function() {
+            checkAnswer(letter);
+        };
+
+        answers.appendChild(button);
+    });
+}
+
+function checkAnswer(letter) {
+
+    if (answered) return;
+
+    const correctLetter = questions[currentQuestion][0];
+
+    const feedback = document.getElementById("feedback");
+
+    if (letter === correctLetter) {
+
+        feedback.textContent = "🎉 Great job! Correct!";
+        feedback.style.color = "green";
+
+        score++;
+
+        answered = true;
+
+        document.querySelectorAll(".answer-btn")
+            .forEach(button => button.disabled = true);
+
+        document.getElementById("nextBtn").style.display =
+            "inline-block";
+
+    } else {
+
+        feedback.textContent = "😊 Try again!";
+        feedback.style.color = "red";
+    }
+}
+
+function nextQuestion() {
+
+    currentQuestion++;
+
+    if (currentQuestion < questions.length) {
+
+        loadQuestion();
+
+    } else {
+
+        showResult();
+    }
+}
+
+function showResult() {
+
+    document.querySelector(".container").innerHTML = `
+        <div class="card">
+            <div class="picture">🏆</div>
+            <h2>Well Done!</h2>
+            <p class="word">
+                Your Score: ${score} / ${questions.length}
+            </p>
+            <p>You completed Alphabet Practice!</p>
+            <button class="next-btn"
+                style="display:inline-block"
+                onclick="goSpelling()">
+                Spelling Game ➜
+            </button>
+            <br>
+            <button class="home-btn" onclick="goHome()">
+                Learn Alphabet
+            </button>
+        </div>
+    `;
+}
+
+function goHome() {
+    window.location.href = "index.html";
+}
+
+function goSpelling() {
+    window.location.href = "spelling.html";
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
